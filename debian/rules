@@ -1,0 +1,22 @@
+#!/usr/bin/make -f
+
+# Increase the "1" below on each hash change
+EPOCH = 1
+VERSION = 0.$(EPOCH)+$(shell echo $(HASH) | cut -b 1-12)
+HASH = 02f17922299f65b4ab54b7ac262ddab4acfe4b07
+DISTRIBUTION = $(shell lsb_release -sc)
+PACKAGEVERSION = $(VERSION)-0~$(DISTRIBUTION)0+exo1
+URL = https://github.com/mobz/elasticsearch-head/archive/$(HASH).tar.gz
+
+%:
+	dh $@
+
+override_dh_auto_clean:
+	wget -nc --progress=dot:mega $(URL)
+
+override_dh_auto_install:
+	mkdir -p debian/elasticsearch-head/usr/share/elasticsearch-head
+	tar -C debian/elasticsearch-head/usr/share/elasticsearch-head --strip-components=1 -xf $(HASH).tar.gz
+
+override_dh_gencontrol:
+	dh_gencontrol -- -v$(PACKAGEVERSION)
